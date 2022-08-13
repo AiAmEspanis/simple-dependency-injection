@@ -23,4 +23,4 @@ jobs:
       run: poetry install
 
     - name: Test with pytest
-      run: poetry run pytest
+      run: poetry run pytest --cov=simple_dependency_injection --cov-config=.coveragerc --cov-report=xml
