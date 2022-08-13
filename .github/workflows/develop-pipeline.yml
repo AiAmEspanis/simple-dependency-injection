@@ -1,0 +1,34 @@
+name: Develop Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-18.04
+    environment: develop
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Run poetry image
+      uses: abatilo/actions-poetry@v2.0.0
+      with:
+        poetry-version: 1.1.8
+
+    - name: install dependencies
+      run: poetry install
+
+    - name: upload lib
+      env:
+        USER: ${{ secrets.PIP_USER }}
+        PASSWORD: ${{ secrets.PIP_PASSWORD }}
+      run: poetry config repositories.test https://test.pypi.org/legacy/ && poetry build && poetry publish -r test --username $USER --password $PASSWORD
