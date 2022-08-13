@@ -27,7 +27,7 @@ jobs:
       run: poetry run pytest --cov=simple_dependency_injection --cov-config=.coveragerc --cov-report=xml
 
     - name: Override Coverage Source Path for Sonar
-      run: sed -i "s/<source>\/home\/runner\/work\/repo<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/work/repo/simple-dependency-injection/test-reports/cov.xml
+      run: sed -i "s/<source>\/home\/runner\/work\/repo<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/work/simple-dependency-injection/test-reports/cov.xml
 
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
