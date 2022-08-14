@@ -1,0 +1,7 @@
+[run]
+omit =
+    tests/*
+[xml]
+output = test-reports/cov.xml
+[html]
+directory = test-reports
