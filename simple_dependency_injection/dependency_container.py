@@ -130,3 +130,6 @@ class DependencyContainerFake:
 
     def test_2(self):
         return 1
+
+    def test_3(self):
+        return 1
