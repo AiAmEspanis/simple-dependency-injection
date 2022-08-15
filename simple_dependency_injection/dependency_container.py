@@ -124,3 +124,6 @@ class DependencyContainerFake:
 
     def reset(self):
         self._dependency_container.restore(self._old_state)
+
+    def test(self):
+        return 1
