@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "simple-dependency-injection"
-version = "0.1.2"
+version = "0.1.4"
 description = ""
 authors = ["AiAmEspanis <rafaperez.software@gmail.com>"]
 readme="README.md"
