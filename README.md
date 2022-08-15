@@ -2,6 +2,7 @@
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AiAmEspanis_simple-dependency-injection&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AiAmEspanis_simple-dependency-injection)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AiAmEspanis_simple-dependency-injection&metric=coverage)](https://sonarcloud.io/summary/new_code?id=AiAmEspanis_simple-dependency-injection)
+[![Production Pipeline](https://github.com/AiAmEspanis/simple-dependency-injection/actions/workflows/production-pipeline.yml/badge.svg)](https://github.com/AiAmEspanis/simple-dependency-injection/actions/workflows/production-pipeline.yml)
 
 simple-dependency-injection is a library is lightweight library to apply dependency injection pattern in a simple way.
 
@@ -24,6 +25,7 @@ That is an example of dependency container configuration
 
 ```
 from abc import ABC, abstractmethod
+from simple_dependency_injection.dependency_container import DependencyContainer
 
 class ConfigDependencyInterface(ABC):
     @abstractmethod

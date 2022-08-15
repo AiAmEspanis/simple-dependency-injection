@@ -1,9 +1,11 @@
+import random
 import unittest
 from abc import ABC, abstractmethod
 
 from simple_dependency_injection.dependency_container import (
     DependencyContainer,
     DependencyFunctionError,
+    DependencyNotRegistered,
 )
 
 
@@ -70,6 +72,38 @@ class TestDependencyContainer(unittest.TestCase):
         self.assertEqual(output.__class__, ComposedDependency)
         self.assertEqual(output.get_message(), "test")
 
+    def test_register_singleton_dependency(self):
+        class BasicSingletonDependencyInterface(ABC):
+            @abstractmethod
+            def get_random_number(self) -> int:
+                pass
+
+        class BasicSingletonDependency(BasicSingletonDependencyInterface):
+            def __init__(self):
+                self._random = random.randint(1, 100)
+
+            def get_random_number(self) -> int:
+                return self._random
+
+        def basic_singleton_dependency_generator() -> BasicSingletonDependencyInterface:
+            return BasicSingletonDependency()
+
+        dependency_container = DependencyContainer()
+        dependency_container.register_dependency(
+            BasicSingletonDependencyInterface,
+            basic_singleton_dependency_generator,
+            singleton=True,
+        )
+
+        output_1 = dependency_container.get_dependency(
+            BasicSingletonDependencyInterface
+        )
+        output_2 = dependency_container.get_dependency(
+            BasicSingletonDependencyInterface
+        )
+
+        self.assertEqual(output_1.get_random_number(), output_2.get_random_number())
+
     def test_register_dependency_with_parameters_not_typed(self):
         def test_dependency_generator(
             one_dependency, other_dependency
@@ -118,6 +152,17 @@ class TestDependencyContainer(unittest.TestCase):
             )
         self.assertEqual(
             "Result returned not typed",
+            str(ex.exception),
+        )
+
+    def test_get_dependency_not_registered(self):
+
+        dependency_container = DependencyContainer()
+
+        with self.assertRaises(DependencyNotRegistered) as ex:
+            dependency_container.get_dependency(BasicDependencyInterface)
+        self.assertEqual(
+            "BasicDependencyInterface is not registered",
             str(ex.exception),
         )
 

@@ -22,9 +22,14 @@ class DependencyContainer:
     def __init__(self):
         self._dependencies = {}
 
-    def register_dependency(self, dependency_interface: Type, dependency_function):
+    def register_dependency(
+        self, dependency_interface: Type, dependency_function, singleton: bool = False
+    ):
         self._check_dependency_function(dependency_function=dependency_function)
-        self._dependencies[dependency_interface] = self.inject(dependency_function)
+        self._dependencies[dependency_interface] = {
+            "singleton": singleton,
+            "generator_function": self.inject(dependency_function),
+        }
 
     def _check_dependency_function(self, dependency_function):
         function_annotations = dependency_function.__annotations__
@@ -62,7 +67,14 @@ class DependencyContainer:
             raise DependencyNotRegistered(
                 f"{dependency_interface.__name__} is not registered"
             )
-        return self._dependencies[dependency_interface]()
+        dependency_config = self._dependencies[dependency_interface]
+        if dependency_config["singleton"]:
+            if "singleton_instance" not in dependency_config:
+                dependency_config["singleton_instance"] = dependency_config[
+                    "generator_function"
+                ]()
+            return dependency_config["singleton_instance"]
+        return self._dependencies[dependency_interface]["generator_function"]()
 
     def exists_dependency(self, dependency_interface: Type):
         return dependency_interface in self._dependencies
