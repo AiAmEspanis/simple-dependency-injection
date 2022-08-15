@@ -34,7 +34,7 @@ jobs:
       run: sed -i 's/\/home\/runner\/work\/simple-dependency-injection\/simple-dependency-injection\//\/github\/workspace\//g' test-reports/cov.xml
 
     - name: Set Correct Sonar Version
-      run: export VERSION=$(grep version pyproject.toml | sed 's/version\s*=\s*"//' | sed 's/"//')
+      run: export VERSION=$(grep version pyproject.toml | sed 's/version\s*=\s*"//' | sed 's/"//') & echo "sonar.projectVersion=${VERSION}" >> sonar-project.properties
 
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
