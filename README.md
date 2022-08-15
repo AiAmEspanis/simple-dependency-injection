@@ -1,5 +1,8 @@
 # simple-dependency-injection
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AiAmEspanis_simple-dependency-injection&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AiAmEspanis_simple-dependency-injection)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AiAmEspanis_simple-dependency-injection&metric=coverage)](https://sonarcloud.io/summary/new_code?id=AiAmEspanis_simple-dependency-injection)
+
 simple-dependency-injection is a library is lightweight library to apply dependency injection pattern in a simple way.
 
 **Note:** simple-dependency-injection is in a development state, there were some checks to finish the first version
