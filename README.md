@@ -24,6 +24,7 @@ That is an example of dependency container configuration
 
 ```
 from abc import ABC, abstractmethod
+from simple_dependency_injection.dependency_container import DependencyContainer
 
 class ConfigDependencyInterface(ABC):
     @abstractmethod
