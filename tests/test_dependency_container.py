@@ -6,6 +6,7 @@ from simple_dependency_injection.dependency_container import (
     DependencyContainer,
     DependencyFunctionError,
     DependencyNotRegistered,
+    DependencyInjectionError,
 )
 
 
@@ -37,6 +38,20 @@ class ComposedDependency(ComposedDependencyInterface):
 class TestDependencyContainer(unittest.TestCase):
     def test_register_dependency(self):
         def basic_dependency_generator() -> BasicDependencyInterface:
+            return BasicDependency()
+
+        dependency_container = DependencyContainer()
+        dependency_container.register_dependency(
+            BasicDependencyInterface, basic_dependency_generator
+        )
+
+        output = dependency_container.get_dependency(BasicDependencyInterface)
+
+        self.assertEqual(output.__class__, BasicDependency)
+
+    def test_register_dependency_with_variables_inside_function(self):
+        def basic_dependency_generator() -> BasicDependencyInterface:
+            var_test = 1
             return BasicDependency()
 
         dependency_container = DependencyContainer()
@@ -183,6 +198,67 @@ class TestDependencyContainer(unittest.TestCase):
 
         self.assertEqual(output, "test")
 
+    def test_inject_basic_with_more_than_one_parameter(self):
+        def basic_dependency_generator() -> BasicDependencyInterface:
+            return BasicDependency()
+
+        dependency_container = DependencyContainer()
+        dependency_container.register_dependency(
+            BasicDependencyInterface, basic_dependency_generator
+        )
+
+        @dependency_container.inject
+        def main(
+            basic_dependency: BasicDependencyInterface, test_parameter: int
+        ) -> str:
+            return basic_dependency.get_message_data() + str(test_parameter)
+
+        output = main(test_parameter=1)
+
+        self.assertEqual(output, "test1")
+
+    def test_inject_basic_with_position_arguments(self):
+        def basic_dependency_generator() -> BasicDependencyInterface:
+            return BasicDependency()
+
+        dependency_container = DependencyContainer()
+        dependency_container.register_dependency(
+            BasicDependencyInterface, basic_dependency_generator
+        )
+
+        @dependency_container.inject
+        def main(
+            basic_dependency: BasicDependencyInterface, test_parameter: int
+        ) -> str:
+            return basic_dependency.get_message_data() + str(test_parameter)
+
+        with self.assertRaises(DependencyInjectionError) as ex:
+            main(1)
+        self.assertEqual(
+            "Injected function not accept position arguments",
+            str(ex.exception),
+        )
+
+    def test_inject_basic_overriding_dependency_in_parameters(self):
+        class BasicDependencyNew(BasicDependencyInterface):
+            def get_message_data(self) -> str:
+                return "test other dependency"
+
+        def basic_dependency_generator() -> BasicDependencyInterface:
+            return BasicDependency()
+
+        dependency_container = DependencyContainer()
+        dependency_container.register_dependency(
+            BasicDependencyInterface, basic_dependency_generator
+        )
+
+        @dependency_container.inject
+        def main(basic_dependency: BasicDependencyInterface) -> str:
+            return basic_dependency.get_message_data()
+
+        output = main(basic_dependency=BasicDependencyNew())
+        self.assertEqual(output, "test other dependency")
+
     def test_inject_compose_dependency(self):
         def basic_dependency_generator() -> BasicDependencyInterface:
             return BasicDependency()
@@ -243,7 +319,7 @@ class TestDependencyContainer(unittest.TestCase):
         def main(basic_dependency: BasicDependencyInterface):
             message_data = basic_dependency.get_message_data()
 
-    def test_override_dependency(self):
+    def test_save_and_restore_dependencies(self):
         def basic_dependency_generator() -> BasicDependencyInterface:
             return BasicDependency()
 
@@ -273,13 +349,16 @@ class TestDependencyContainer(unittest.TestCase):
         def main(composed_dependency: ComposedDependencyInterface) -> str:
             return composed_dependency.get_message()
 
-        with dependency_container.test_container() as dependency_container_test:
-            dependency_container_test.override(
-                BasicDependencyInterface, basic_dependency_generator_v2
-            )
-            output = main()
+        dependency_container.save()
+
+        dependency_container.register_dependency(
+            BasicDependencyInterface, basic_dependency_generator_v2
+        )
+        output = main()
 
         self.assertEqual(output, "test_2")
+
+        dependency_container.restore()
 
         output = main()
 
