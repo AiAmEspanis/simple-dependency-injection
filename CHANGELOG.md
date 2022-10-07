@@ -13,6 +13,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
  
 ### Fixed
 
+## [0.1.6] - 2022-10-07
+ 
+### Added
+- Functionality to put the dependency directly into function parameters and disable injection function
+- Allow only key parameters in function with injection decorator
+
+### Changed
+- Simplify save and restore function to simplify testing
+
+### Fixed
+- Fix error when dependency function have variables inside the code
+
 
 ## [0.1.5] - 2022-08-15
  

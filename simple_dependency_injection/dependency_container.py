@@ -10,17 +10,14 @@ class DependencyFunctionError(Exception):
     pass
 
 
-class DependencyContainerState:
-    def __init__(self, dependencies):
-        self._dependencies = dependencies
-
-    def get_dependencies(self):
-        return self._dependencies
+class DependencyInjectionError(Exception):
+    pass
 
 
 class DependencyContainer:
     def __init__(self):
         self._dependencies = {}
+        self._saved_dependencies = {}
 
     def register_dependency(
         self, dependency_interface: Type, dependency_function, singleton: bool = False
@@ -41,7 +38,9 @@ class DependencyContainer:
 
         parameters_not_typed = [
             parameter
-            for parameter in dependency_function.__code__.co_varnames
+            for parameter in dependency_function.__code__.co_varnames[
+                : dependency_function.__code__.co_argcount
+            ]
             if parameter not in parameters_annotations
         ]
         if len(parameters_not_typed) > 0:
@@ -81,6 +80,10 @@ class DependencyContainer:
 
     def inject(self, func):
         def function_injected(*args, **kwargs):
+            if len(args) > 0:
+                raise DependencyInjectionError(
+                    "Injected function not accept position arguments"
+                )
             function_annotations = func.__annotations__
             parameters_annotations = {
                 annotation: function_annotations[annotation]
@@ -91,9 +94,10 @@ class DependencyContainer:
 
             dependency_kwargs = {}
             for params_name in parameters_annotations:
-                dependency_kwargs[params_name] = self.get_dependency(
-                    function_annotations[params_name]
-                )
+                if params_name not in kwargs:
+                    dependency_kwargs[params_name] = self.get_dependency(
+                        function_annotations[params_name]
+                    )
             new_func = partial(func, **dependency_kwargs)
 
             result = new_func(*args, **kwargs)
@@ -107,32 +111,9 @@ class DependencyContainer:
 
         return function_injected
 
-    def test_container(self):
-        return DependencyContainerFake(dependency_container=self)
+    def save(self):
+        self._saved_dependencies = self._dependencies.copy()
 
-    def save(self) -> DependencyContainerState:
-        return DependencyContainerState(dependencies=self._dependencies.copy())
-
-    def restore(self, memento: DependencyContainerState):
-        self._dependencies = memento.get_dependencies()
-
-
-class DependencyContainerFake:
-    def __init__(self, dependency_container: DependencyContainer):
-        self._dependency_container = dependency_container
-        self._old_state = self._dependency_container.save()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        self.reset()
-
-    def override(self, dependency_interface, dependency_function):
-        self._dependency_container.register_dependency(
-            dependency_interface=dependency_interface,
-            dependency_function=dependency_function,
-        )
-
-    def reset(self):
-        self._dependency_container.restore(self._old_state)
+    def restore(self):
+        if self._saved_dependencies:
+            self._dependencies = self._saved_dependencies
